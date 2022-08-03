@@ -47,7 +47,7 @@ If however you would like to manually oversee the process, please press a key.
 
 
 #Give the user a chance to override the automated process
-time.sleep(1)
+time.sleep(10)
 
 #If the user wants to manually oversee the process, this function will ask the user to press a key
 #If the system doesnt detect a key within 10 seconds of the above message, it will assume that the user wants to automate the process, setting the user's AFK status to True
