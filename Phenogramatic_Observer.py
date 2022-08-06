@@ -62,19 +62,23 @@ def function_caller():
     SKU_injector()
     
     
+    
+    #Deleting a previous index column and saving our new spreadsheet
     worksheet.delete_cols(1)
     workbook_openpyxl.save("Output.xlsx")
     
-    #saving our amazing work
+    #converting the xlsx file back to csv, the "index=False" prevents us from getting an uneeded column 0
     panda_workbook_access = pandas.read_excel("Output.xlsx")
     panda_workbook_access.to_csv("Output.csv",  index=False)
     
+    #We cant leave the house in a tip, gotta clean up after oursleves
     os.remove(pre_excel_path)
     os.remove(source_csv_path)
     os.remove("Output.xlsx")
     
-    print("All done!")
+    
     #printing a message to the user to show that the script has finished
+    print("All done!")
     
     
 
@@ -84,6 +88,7 @@ def function_caller():
 
 
 #This function will create files if needed
+#It wil recieve the status of the booleans (new_excel_file_needed, source_csv_exists) and use logic to dictate the course of action to take
 def xlsx_generation(new_excel_file_needed, source_csv_exists):
     
     #There are 4 possible scenarios for the excel file and CSV file status
@@ -114,7 +119,7 @@ def xlsx_generation(new_excel_file_needed, source_csv_exists):
         time.sleep(5)
         os._exit(0)
         
-    #Case 3 of 4: The excel file does exist, but the csv file does not...
+    #Case 3 of 4: The excel file does exist, but the csv file does too...
     #CSV file exists!
     #...
     #but so does the excel file...
@@ -131,6 +136,9 @@ def xlsx_generation(new_excel_file_needed, source_csv_exists):
         time.sleep(2)
         csv_creation_time = os.path.getctime(source_csv_path)
         excel_creation_time = os.path.getctime(pre_excel_path)
+        
+        #I did not check the below properly and it seems that it does not work as intended for a newer csv_creation_time, it is however a very very niche use case so should be absolutely fine
+        # Especially since we clean up our mess
         if csv_creation_time > excel_creation_time:
             print("""
                   The CSV file was created more recently than the Excel file
@@ -138,6 +146,7 @@ def xlsx_generation(new_excel_file_needed, source_csv_exists):
                   Please make sure that you have a backup of the Excel file before proceeding
                   """)
             time.sleep(2)
+            #This was unfinished therefore it does not work properly as both branches lead to the same result
         elif csv_creation_time < excel_creation_time:
             print("""
                   The Excel file was created more recently than the CSV file
@@ -146,11 +155,13 @@ def xlsx_generation(new_excel_file_needed, source_csv_exists):
                   """)
             time.sleep(2)
         
-    # skipping case 4 for time purposes, due to expediting,
+    # skipping case 4 for time purposes, due to a request to expedite the code generation,
     # if returning to bolster, worth rechecking
 
         
 #defining a function that will check whether a Con_1 csv and/or excel file exists
+#this is required so that we can be sure that all the components for formatting are in place
+#prevents a fatal error later
 def check_for_existing_files():
     #checking for the existence of the excel file
     if os.path.exists(pre_excel_path):
@@ -181,6 +192,7 @@ def check_for_existing_files():
 
 
 #creates data for the "Buyer Country" column
+#as the namesake suggests, it also injects this into the respective column, following the "injector" function trend
 def country_injector():
     #Cycling through the rows in the "Buyer Country" of the excel file
     
@@ -191,6 +203,7 @@ def country_injector():
     
     
 #creates data for the "No of Parcels" column   
+#Injector type function
 def parcel_no_injector():
     #Cycling through the rows in the "No of Parcels" of the excel file
     
@@ -199,7 +212,8 @@ def parcel_no_injector():
         worksheet[ "N" + str(i+1)] = "1"
     print("Added No of Parcels")     
     
-#creates data for the "Weight" column 
+#creates data for the "Weight" column
+#Injector type function 
 def weight_injector():
     #Cycling through the rows in the "Weight" of the excel file
     
@@ -209,7 +223,8 @@ def weight_injector():
     print("Added Weight") 
     
     
-#creates data for the "SKU" column   
+#creates data for the "SKU" column 
+#Injector type function 
 def SKU_injector():
     #Cycling through the rows in the "SKU" of the excel file
     worksheet["P1"] = "SKU"
@@ -226,6 +241,7 @@ def SKU_injector():
 
         
 #function that will write back and replace the existing phone numbers with the correctly formatted ones
+#This functions as an injector type function
 def phone_number_injector(formatted_phone_numbers):
     #Cycling through the rows in the phone number column of the excel file
     for i in range(1 , sheet.nrows):
@@ -233,7 +249,8 @@ def phone_number_injector(formatted_phone_numbers):
         worksheet[ get_column_letter(5) + str(i+1)] = formatted_phone_numbers[i-1]
     print("Phone numbers successfully formatted")
 
-#funtion used to format phone numbers
+#funtion used to format phone numbers, takes into account length and validity of charachters, attempts to salvage improperly formatted numbers
+#formatting type function
 def phone_number_format(phone_numbers):
     #format the phone number to be in the format of xxxx xxx xxx (without spaces), where x denotes an integer between 0-9 inclusive
     banned_character_for_phone = ["-", " ", "(", ")", "+", ".", "/", "*", "#", "!", "@", "$", "%", "^", "&", "?", "!", '"',	"#", "$", "%", "&",	"'", "(", ")", "*", "+", ",","-",".", "/", ":", ";"	,"<", "=", ">", "?", "~", "]", "["]
@@ -291,6 +308,7 @@ def phone_number_format(phone_numbers):
 
      
 #This function fetches the phone numbers from excel and places them into an array to be sent for formatting purposes
+#Fetcher type function
 def phone_number_fetcher():
     #Cycling through the rows in the phone number column of the excel file
     for i in range(1 , sheet.nrows):
@@ -309,7 +327,8 @@ def phone_number_fetcher():
    
    
    
-#recieves the formatted_postcodes and injects them into the excel file 
+#recieves the formatted_postcodes and injects them into the excel file , overwriting the incorrect originals
+#Injector type function
 def postcode_injector(formatted_postcodes):
     #Cycling through the rows in the "Buyer Posdtcode" of the excel file
     for i in range(1 , sheet.nrows -1):
@@ -320,6 +339,8 @@ def postcode_injector(formatted_postcodes):
   
   
 #splices the fetched postcode, sends them for injection into the excel file
+#Each postcode will have " ABC" at the end, making it valid where ABC are any valid alphanumeric characters
+#Formatting type function
 def postcode_splicer(postcodes):
     for postcode in postcodes:
         exploded_postcode = (list(postcode))
@@ -336,6 +357,7 @@ def postcode_splicer(postcodes):
             
 
 #Fetches postcodes for splicing and verification
+#fetcher type function
 def postcode_fetcher():
     #Cycling through the rows in the phone number column of the excel file
     for i in range(1 , sheet.nrows):
@@ -348,6 +370,7 @@ def postcode_fetcher():
 
 
 #receives the formatted names and injects them into the excel file
+#Injector type function
 def name_injector(formatted_names):
     #Cycling through the rows in the "Buyer Name" of the excel file
     for i in range(1 , sheet.nrows -1):
@@ -357,6 +380,9 @@ def name_injector(formatted_names):
 
 
 #receives the names and formats them for injection
+#This requires removal of non alpha charachters
+#sends the formatted names to the respective injector
+#formatter type function
 def name_formatter(names):
     for name in names:
         #removing special characters from the names
